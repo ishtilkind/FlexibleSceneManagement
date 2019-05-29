@@ -1,0 +1,21 @@
+ManifestFileVersion: 0
+CRC: 2102406617
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 2a58d523640ebb33c070f747bb073adc
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 8899b55b807ddc9d08351161ded8f459
+HashAppended: 0
+ClassTypes:
+- Class: 114
+  Script: {fileID: 11500000, guid: 32e8530d5a4ff3f42aa83c9b8df7d90f, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 9f3670c1683c10044a591dded1eef7ef, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AdditiveSceneStudy/Data/SceneManagerSettings.asset
+- Assets/AdditiveSceneStudy/Data/AppSettings.asset
+Dependencies: []

@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 604789738
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: management_console
+      Dependencies: {}
+    Info_1:
+      Name: settings
+      Dependencies: {}
