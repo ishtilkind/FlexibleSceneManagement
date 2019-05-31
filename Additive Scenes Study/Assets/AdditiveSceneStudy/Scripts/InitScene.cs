@@ -6,133 +6,139 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
-public class InitScene : BaseTripssScene
+namespace TRIPSS
 {
-    [SerializeField]
-    private string nextSceneName;
-
-    [SerializeField] private volatile SettingsApplication appSettings;
-    [SerializeField] private volatile SceneManagerSettings sceneManagerSettings;
-    [SerializeField] private volatile ManagementConsoleScene managementConsoleScene;
-
-    protected override void OnEnable()
+    public class InitScene : BaseTripssScene
     {
-        base.OnEnable();
-        Debug.Log($"OnEnable called from {name}");
-    }
+        [SerializeField] private string nextSceneName;
 
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-        Debug.Log($"OnDisable called from {name}");
-    }
+        [SerializeField] private volatile SettingsApplication appSettings;
+        [SerializeField] private volatile SceneManagerSettings sceneManagerSettings;
+        [SerializeField] private volatile ManagementConsoleScene managementConsoleScene;
 
-    private IEnumerator Start()
-    {
-        yield return StartCoroutine( Initialize() );
-    }
+        //protected override void OnEnable()
+        //{
+        //    base.OnEnable();
+        //    Debug.Log($"OnEnable called from {name}");
+        //}
 
-    // Update is called once per frame
-    IEnumerator Initialize()
-    {
-        if (null == appSettings || null == sceneManagerSettings)
+        //protected override void OnDisable()
+        //{
+        //    base.OnDisable();
+        //    Debug.Log($"OnDisable called from {name}");
+        //}
+
+        private IEnumerator Start()
         {
-            yield return StartCoroutine(LoadExternalSettingsAsync(onFinishedLoadingExtrernalResources));
+            yield return StartCoroutine(Initialize());
         }
-        else
+
+        // Update is called once per frame
+        IEnumerator Initialize()
         {
-            onFinishedLoadingExtrernalResources();
-        }
-    }
-
-    private void onFinishedLoadingExtrernalResources()
-    {
-        if (null != appSettings)
-        {
-            var cam = Camera.main;
-            cam.backgroundColor = appSettings.CameraBackgroundColor;
-        }
-        StartCoroutine(LoadNextScene());
-    }
-
-    IEnumerator LoadNextScene()
-    {
-        if (null != sceneManagerSettings)
-        {
-            nextSceneName = sceneManagerSettings.sceneManagerData[sceneManagerSettings.bootstrapIndex].sceneName.ToString();
-        }
-        SceneManager.LoadSceneAsync(nextSceneName, LoadSceneMode.Additive);
-        yield return null;
-    }
-
-    private IEnumerator LoadExternalSettingsAsync(Action onFinished)
-    {
-        var url = Path.Combine(Application.streamingAssetsPath, "settings");
-        Debug.Log(url);
-
-        using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(url))
-        {
-            yield return uwr.SendWebRequest();
-
-            if (uwr.isNetworkError || uwr.isHttpError)
+            if (null == appSettings || null == sceneManagerSettings)
             {
-                Debug.Log(uwr.error);
+                yield return StartCoroutine(LoadExternalSettingsAsync(onFinishedLoadingExtrernalResources));
             }
             else
             {
-                // Get downloaded asset bundle
-                AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(uwr);
-
-                if (bundle != null )
-                {
-                    if (null == appSettings && bundle.Contains("AppSettings"))
-                    {
-                        appSettings = bundle.LoadAsset<SettingsApplication>("AppSettings");
-                    }
-                    if (null == sceneManagerSettings && bundle.Contains("SceneManagerSettings"))
-                    {
-                        sceneManagerSettings = bundle.LoadAsset<SceneManagerSettings>("SceneManagerSettings");
-                    }
-                }
-
+                onFinishedLoadingExtrernalResources();
             }
-
-            onFinished?.Invoke();
         }
 
-        // yield return LoadExternalUtilityScenesAsync(onFinished);
-    }
-
-    private IEnumerator LoadExternalUtilityScenesAsync(Action onFinished)
-    {
-        var url = Path.Combine(Application.streamingAssetsPath, "management_console");
-        Debug.Log(url);
-
-        using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(url))
+        private void onFinishedLoadingExtrernalResources()
         {
-            yield return uwr.SendWebRequest();
-
-            if (uwr.isNetworkError || uwr.isHttpError)
+            if (null != appSettings)
             {
-                Debug.Log(uwr.error);
+                var cam = Camera.main;
+                cam.backgroundColor = appSettings.CameraBackgroundColor;
             }
-            else
-            {
-                // Get downloaded asset bundle
-                AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(uwr);
 
-                if (bundle != null)
+            StartCoroutine(LoadNextScene());
+        }
+
+        IEnumerator LoadNextScene()
+        {
+            if (null != sceneManagerSettings)
+            {
+                nextSceneName = sceneManagerSettings.internalScenes[sceneManagerSettings.bootstrapIndex].sceneName
+                    .ToString();
+            }
+
+            SceneManager.LoadSceneAsync(nextSceneName, LoadSceneMode.Additive);
+            yield return null;
+        }
+
+        private IEnumerator LoadExternalSettingsAsync(Action onFinished)
+        {
+            var url = Path.Combine(Application.streamingAssetsPath, "settings");
+            Debug.Log(url);
+
+            using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(url))
+            {
+                yield return uwr.SendWebRequest();
+
+                if (uwr.isNetworkError || uwr.isHttpError)
                 {
-                    if (null == appSettings && bundle.Contains("ManagementConsoleUI"))
+                    Debug.Log(uwr.error);
+                }
+                else
+                {
+                    // Get downloaded asset bundle
+                    AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(uwr);
+
+                    if (bundle != null)
                     {
-                        managementConsoleScene = bundle.LoadAsset<ManagementConsoleScene>("ManagementConsoleUI");
+                        if (null == appSettings && bundle.Contains("AppSettings"))
+                        {
+                            appSettings = bundle.LoadAsset<SettingsApplication>("AppSettings");
+                        }
+
+                        if (null == sceneManagerSettings && bundle.Contains("SceneManagerSettings"))
+                        {
+                            sceneManagerSettings = bundle.LoadAsset<SceneManagerSettings>("SceneManagerSettings");
+                        }
                     }
+
                 }
 
+                onFinished?.Invoke();
             }
 
-            onFinished?.Invoke();
+            // yield return LoadExternalUtilityScenesAsync(onFinished);
         }
-    }
 
+        private IEnumerator LoadExternalUtilityScenesAsync(Action onFinished)
+        {
+            var url = Path.Combine(Application.streamingAssetsPath, "management_console");
+            Debug.Log(url);
+
+            using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(url))
+            {
+                yield return uwr.SendWebRequest();
+
+                if (uwr.isNetworkError || uwr.isHttpError)
+                {
+                    Debug.Log(uwr.error);
+                }
+                else
+                {
+                    // Get downloaded asset bundle
+                    AssetBundle bundle = DownloadHandlerAssetBundle.GetContent(uwr);
+
+                    if (bundle != null)
+                    {
+                        if (null == appSettings && bundle.Contains("ManagementConsoleUI"))
+                        {
+                            managementConsoleScene = bundle.LoadAsset<ManagementConsoleScene>("ManagementConsoleUI");
+                        }
+                    }
+
+                }
+
+                onFinished?.Invoke();
+            }
+        }
+
+    }
 }

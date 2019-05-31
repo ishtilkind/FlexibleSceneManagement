@@ -3,18 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class BaseTripssScene : MonoBehaviour
+namespace TRIPSS
 {
-    protected Action<string> onLoaded;
-    protected Action<string> onUnloaded;
-    [SerializeField] protected int backToIndex = -1;
-    protected virtual void OnEnable()
+    public abstract class BaseTripssScene : MonoBehaviour, IManagedScene
     {
-        onLoaded?.Invoke(name);
-    }
+        protected Action<string> onLoaded;
+        protected Action<string> onUnloaded;
+        [SerializeField] protected int backToIndex = -1;
 
-    protected virtual void OnDisable()
-    {
-        onUnloaded?.Invoke(name);
+        protected virtual void OnEnable()
+        {
+            SceneLoaded();
+        }
+
+        protected virtual void OnDisable()
+        {
+            SceneUnloaded();
+        }
+
+        public void SceneLoaded()
+        {
+            onLoaded?.Invoke(name);
+        }
+
+        public void SceneUnloaded()
+        {
+            onUnloaded?.Invoke(name);
+        }
     }
 }
